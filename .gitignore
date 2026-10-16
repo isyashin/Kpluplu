@@ -1,0 +1,25 @@
+﻿# индексы и данные
+*.db
+*.db-shm
+*.db-wal
+groups.json
+poc/
+tests/per_base_report.json
+docs/CONS++.md
+
+# окружение и выхлоп
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.out
+*.err
+parallel_*.out
+parallel_*.err
+api_autostart.log
+
+# opencode runtime
+node_modules/
+.opencode/node_modules/
+opencode-agent/Документы/*
+!opencode-agent/Документы/.gitkeep

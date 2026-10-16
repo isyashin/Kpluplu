@@ -1,0 +1,7 @@
+﻿{
+  "CONSPLUS_BASES": "D:\\path\\to\\ConsultantPlus\\BASE",
+  "CONSPLUS_API": "http://127.0.0.1:8741",
+  "CONSPLUS_PORT": 8741,
+  "INDEX_GROUPS": 3,
+  "WORKERS": 4
+}

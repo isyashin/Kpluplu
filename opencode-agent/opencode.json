@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "mike",
+  "instructions": [
+    ".opencode/skills/ru-legal-style/SKILL.md",
+    ".opencode/skills/anti-slop/SKILL.md"
+  ],
+  "agent": {
+    "build": { "disable": true },
+    "plan": { "disable": true },
+    "general": { "disable": true },
+    "explore": { "disable": true }
+  },
+  "mcp": {
+    "consplus": {
+      "type": "local",
+      "command": [
+        "python",
+        "D:\\path\\to\\consplus-direct\\mcp_server\\run.py"
+      ],
+      "enabled": true,
+      "environment": {
+        "CONSPLUS_API": "http://127.0.0.1:8741"
+      }
+    },
+    "context7": { "enabled": false },
+    "tavily": { "enabled": false },
+    "github": { "enabled": false },
+    "amocrm": { "enabled": false },
+    "sequential-thinking": { "enabled": false },
+    "ssh-manager": { "enabled": false },
+    "garant": { "enabled": false },
+    "russian-legislation": { "enabled": false },
+    "apify": { "enabled": false },
+    "ocr-mcp": { "enabled": false },
+    "proxmox": { "enabled": false }
+  },
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "external_directory": { "*": "deny" }
+  }
+}
