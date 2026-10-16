@@ -16,24 +16,40 @@ and an MCP server for AI agents. Works on top of the original base files (read-o
 
 ## Quickstart (Windows)
 
-Откройте PowerShell в папке проекта:
+Откройте PowerShell в папке, куда хотите скачать проект:
 
 ```powershell
-scripts\setup.ps1                          # venv + зависимости
+git clone https://github.com/isyashin/Kpluplu.git
+Set-Location Kpluplu
 $env:CONSPLUS_BASES = "D:\путь\к\ConsultantPlus\BASE"
-scripts\index_all.ps1                      # индексация ~2-3 часа (все базы)
-scripts\merge.ps1                          # мерж + связи
-scripts\run_api.ps1                        # API: http://127.0.0.1:8741/docs
-python mcp_server\run.py                   # MCP stdio (API поднимется сам)
+.\scripts\setup.ps1                        # venv + зависимости
+.\scripts\index_all.ps1                    # ждёт завершения всех групп
+.\scripts\merge.ps1                        # карточки + связи
+.\scripts\run_api.ps1                      # API: http://127.0.0.1:8741/docs
 ```
 
-Частичная индексация одной базы: `python indexer\index_fast.py "BASE\LAW" index.db`
+Последняя команда держит API запущенным. MCP подключайте из агента или запускайте
+`.\.venv\Scripts\python.exe mcp_server\run.py` в другом терминале.
+Подробности — в [инструкции](docs/INSTALL.md).
+
+## Локальные индексы
+
+Индексы строятся из собственной копии базы КонсультантПлюс и не входят в репозиторий.
+В испытанном наборе из 132 баз четыре файла заняли **114,32 ГиБ**: `index.db`
+(12,37 ГиБ) и `index_part1..3.db` (33,35 + 37,43 + 31,18 ГиБ).
+Размер зависит от состава базы; для такого набора подготовьте не менее 150 ГиБ
+свободного места под сборку и временный объединённый индекс.
+
+GitHub [не принимает файлы более 100 МиБ в обычный Git](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github),
+а [лимит одного файла Git LFS не превышает 5 ГБ](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage).
+Каждый из четырёх файлов больше этого лимита. Для совместной работы передавайте
+код через GitHub, а индексы собирайте локально по инструкции.
 
 ## Требования
 
 - Windows, Python 3.13+, ~8+ ГБ RAM, SSD
 - Локальная копия базы КонсультантПлюс (папка с `BASE\`)
-- Диск: индекс ≈ 0.7 × объём базы
+- Свободное место для индексов: зависит от базы; для испытанного набора — от 150 ГиБ
 
 ## Структура
 
@@ -53,9 +69,11 @@ python mcp_server\run.py                   # MCP stdio (API поднимется
 |---|---|---|
 | `CONSPLUS_BASES` | путь к папке `BASE\` КонсультантПлюс | (требуется) |
 | `CONSPLUS_API` | URL Search API | `http://127.0.0.1:8741` |
-| `CONSPLUS_PORT` | порт API | `8741` |
 | `CONSPLUS_INDEX` | путь к index.db | `./index.db` |
 | `CONSPLUS_PARTS_DIR` | папка с index_part1..3.db | папка `CONSPLUS_INDEX` |
+
+`config.example.json` служит примером значений; программы читают переменные
+окружения и не загружают этот файл автоматически.
 
 Поиск в MCP принимает `page` и `limit` (до 50 карточек на странице). Порядок
 определяется рангом FTS и стабилен при изменении `limit`; высокий ранг сам по себе
@@ -72,7 +90,8 @@ python mcp_server\run.py                   # MCP stdio (API поднимется
 Шаблон в `opencode-agent/`: opencode-конфигурация только с consplus MCP,
 агент Mike — юридический ассистент, который отвечает строго по источникам из базы
 и сохраняет результат как структурированный .docx. См. `docs/INSTALL.md` раздел 6.
-Перед запуском замените пример пути к `mcp_server/run.py` в конфигурации шаблона.
+Перед запуском замените пример путей к Python, `mcp_server/run.py` и `BASE`
+в конфигурации шаблона.
 
 ## Лицензия и дисклеймер
 

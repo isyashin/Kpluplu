@@ -1,4 +1,4 @@
-"""Параллельная индексация всех баз: разбивка на N групп по размеру DT2,
+r"""Параллельная индексация всех баз: разбивка на N групп по размеру DT2,
 каждая группа — отдельный процесс в index_partN.db.
 
 Использование:
@@ -19,6 +19,8 @@ WORKERS_PER_PROC = 4
 
 
 def base_sizes():
+    if not BASE.is_dir():
+        raise FileNotFoundError(f"CONSPLUS_BASES не указывает на папку BASE: {BASE}")
     out = []
     for d in sorted(BASE.iterdir()):
         if d.is_dir() and (d / f"{d.name}.DT2").exists() and (d / f"{d.name}.DT1").exists():
@@ -28,6 +30,8 @@ def base_sizes():
 
 def split_groups():
     sizes = base_sizes()
+    if not sizes:
+        raise RuntimeError(f"В {BASE} не найдены базы с файлами DT1 и DT2")
     groups = [[] for _ in range(N_GROUPS)]
     gsum = [0] * N_GROUPS
     for name, size in sorted(sizes, key=lambda x: -x[1]):
@@ -41,9 +45,13 @@ def split_groups():
 
 
 def run_group(idx: int):
+    if idx is None or not 1 <= idx <= N_GROUPS:
+        raise ValueError(f"Номер группы должен быть от 1 до {N_GROUPS}")
     groups = json.loads((ROOT / "groups.json").read_text(encoding="utf-8"))
     names = groups[idx - 1]
     db = ROOT / f"index_part{idx}.db"
+    if db.exists():
+        raise FileExistsError(f"Индекс уже существует: {db}. Для полной сборки нужна пустая папка индексов.")
     log = ROOT / f"index_part{idx}.log"
     with open(log, "w", encoding="utf-8") as lf:
         for i, name in enumerate(names, 1):
@@ -51,10 +59,14 @@ def run_group(idx: int):
             lf.write(f"[{i}/{len(names)}] {name}\n")
             lf.flush()
             t0 = __import__("time").time()
-            subprocess.run(
+            result = subprocess.run(
                 [sys.executable, str(ROOT / "indexer" / "index_fast.py"),
                  str(BASE / name), str(db), "--workers", str(WORKERS_PER_PROC)],
                 stdout=lf, stderr=subprocess.STDOUT, cwd=str(ROOT))
+            if result.returncode != 0:
+                lf.write(f"    FAILED: {name}, exit code {result.returncode}\n")
+                lf.flush()
+                raise RuntimeError(f"Индексация базы {name} завершилась с кодом {result.returncode}")
             lf.write(f"    done in {__import__('time').time()-t0:.0f}s\n")
             lf.flush()
 

@@ -15,12 +15,13 @@
     "consplus": {
       "type": "local",
       "command": [
-        "python",
-        "D:\\path\\to\\consplus-direct\\mcp_server\\run.py"
+        "D:\\path\\to\\Kpluplu\\.venv\\Scripts\\python.exe",
+        "D:\\path\\to\\Kpluplu\\mcp_server\\run.py"
       ],
       "enabled": true,
       "environment": {
-        "CONSPLUS_API": "http://127.0.0.1:8741"
+        "CONSPLUS_API": "http://127.0.0.1:8741",
+        "CONSPLUS_BASES": "D:\\path\\to\\ConsultantPlus\\BASE"
       }
     },
     "context7": { "enabled": false },

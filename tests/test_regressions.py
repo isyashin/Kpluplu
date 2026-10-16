@@ -5,10 +5,10 @@ import tempfile
 import unittest
 from contextlib import closing
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from api import main as api
-from indexer import build_relations, merge_parts
+from indexer import build_relations, merge_parts, parallel
 
 
 class SearchOrderTest(unittest.TestCase):
@@ -147,6 +147,21 @@ class MergeTest(unittest.TestCase):
             with patch.object(api, "INDEX_DB", merged), patch.object(
                     api, "PARTS", [(i, root / f"index_part{i}.db", 0) for i in (1, 2, 3)]):
                 self.assertEqual([x[2] for x in api.search_parts()], [0, 1, 2])
+
+
+class ParallelIndexTest(unittest.TestCase):
+    def test_failed_base_does_not_mark_group_done(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "groups.json").write_text('[["LAW"], [], []]', encoding="utf-8")
+            with (patch.object(parallel, "ROOT", root),
+                  patch.object(parallel, "BASE", root / "BASE"),
+                  patch.object(parallel.subprocess, "run", return_value=Mock(returncode=7))):
+                with self.assertRaisesRegex(RuntimeError, "LAW"):
+                    parallel.run_group(1)
+            log = (root / "index_part1.log").read_text(encoding="utf-8")
+            self.assertIn("FAILED: LAW", log)
+            self.assertNotIn("done in", log)
 
 
 if __name__ == "__main__":
